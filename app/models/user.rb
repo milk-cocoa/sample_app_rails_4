@@ -28,8 +28,8 @@ class User < ActiveRecord::Base
   end
 
   def self.followings(user)
-    where("SELECT id FROM relationships WHERE follower_id = :user_id", user_id: user.id)
-    #relationships.find_by(follower_id: self.id)
+    followings_user_ids = "SELECT followed_id FROM relationships WHERE follower_id = :user_id"
+    where("id IN (#{followings_user_ids}) OR id = :user_id", user_id: user.id)
   end
 
   def following?(other_user)
