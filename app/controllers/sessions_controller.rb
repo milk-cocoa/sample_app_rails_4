@@ -25,7 +25,7 @@ class SessionsController < ApplicationController
     exp = Time.now.to_i + 4 * 3600
     print(current_user)
     payload = {:id => current_user.id, :exp => exp }
-    hmac_secret = '643fe2b25f782ac50a94a93887026575364e965afb0b0683047fc0ecd278b9809a4516f301bfa6b99b4ef325bd363511'
+    hmac_secret = 'your secret key'
     token = JWT.encode payload, hmac_secret, 'HS256'
     render :json => {:token => token }
   end
