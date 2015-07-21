@@ -1,0 +1,5 @@
+<% if @followings.any? %>
+  <ol class="microposts">
+    <%= render partial: 'shared/following', collection: @followings %>
+  </ol>
+<% end %>

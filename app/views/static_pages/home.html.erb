@@ -1,3 +1,81 @@
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src='https://cdn.mlkcca.com/v2.0.0/milkcocoa.js'></script>
+<style>
+  .microposts {
+
+  }
+  .microposts .user {
+    
+  }
+  .microposts .user {
+    
+  }
+
+</style>
+<script>
+$(function() {
+  var milkcocoa = new MilkCocoa("uniiaxclo10.mlkcca.com");
+  milkcocoa.user(function(err, user) {
+    if(user) {
+      start(user);
+    }else{
+      loginToMilkcocoa();
+    }
+  });
+
+  //Milkcocoaに認証する。
+  function loginToMilkcocoa() {
+    $.get("/get_token", {}, function(data){
+      milkcocoa.authWithToken(data.token, function(err, user) {
+        start(user);
+      });
+    }, 'json');
+  }
+
+  function get_followings() {
+    $.get("/followings", {}, function(data){
+      if(data && data.followings)
+        data.followings.forEach(showFeed);
+    }, 'json');
+  }
+
+  function start(current_user) {
+    console.log(current_user);
+    var ds = milkcocoa.dataStore("micropost").child(current_user.id);
+    get_followings();
+    $("#post-btn").click(function(e) {
+      var content = $("#micropost_content").val();
+      console.log(content);
+      if(content) {
+        ds.push({
+          content : content
+        });
+        $("#micropost_content").val("");
+      }
+    });
+  }
+
+  function showFeed(user) {
+    var user_id = user.id;
+    var ds = milkcocoa.dataStore("micropost").child(user_id);
+
+    $("#followings").append('<div class="microposts"><div class="user">'+user.name+'</div><div id="feed-'+user_id+'"></div></div>');
+
+    ds.stream().next(function(err, posts) {
+      posts.forEach(function(p) {
+        $('#feed-'+user_id).append('<div class="content">'+p.value.content+'</div>');
+      });
+
+    });
+
+    ds.on('push', function(pushed) {
+        $('#feed-'+user_id).append('<div class="content">'+pushed.value.content+'</div>');
+    });
+
+  }
+})
+
+</script>
 <% if signed_in? %>
   <div class="row">
     <aside class="span4">
@@ -8,12 +86,21 @@
         <%= render 'shared/stats' %>
       </section>
       <section>
-        <%= render 'shared/micropost_form' %>
+
+        <div class="new_micropost">
+
+          <div class="field">
+            <textarea id="micropost_content" placeholder="Compose new micropost..."></textarea>
+          </div>
+          <button id="post-btn" class="btn btn-large btn-primary">Post</button>
+        </div>
+
+
       </section>
     </aside>
     <div class="span8">
       <h3>Micropost Feed</h3>
-      <%= render 'shared/feed' %>
+      <div id="followings"></div>
     </div>
   </div>
 <% else %>
@@ -32,3 +119,5 @@
 
   <%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>
 <% end %>
+
+

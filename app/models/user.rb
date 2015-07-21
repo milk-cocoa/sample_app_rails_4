@@ -27,6 +27,11 @@ class User < ActiveRecord::Base
     Micropost.from_users_followed_by(self)
   end
 
+  def self.followings(user)
+    where("SELECT id FROM relationships WHERE follower_id = :user_id", user_id: user.id)
+    #relationships.find_by(follower_id: self.id)
+  end
+
   def following?(other_user)
     relationships.find_by(followed_id: other_user.id)
   end

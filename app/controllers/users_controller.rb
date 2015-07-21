@@ -60,6 +60,11 @@ class UsersController < ApplicationController
     render 'show_follow'
   end
 
+  def followings
+    followings = User.followings(current_user)
+    render :json => {:followings => followings.map {|f| {:id => f.id, :name => f.name } } }
+  end
+
   private
 
     def user_params
